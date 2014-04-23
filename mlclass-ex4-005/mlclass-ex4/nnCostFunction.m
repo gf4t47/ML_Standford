@@ -63,17 +63,32 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-h_theta = sigmoid([ones(m,1) sigmoid([ones(m, 1) X] * Theta1')] * Theta2');
+a1 = [ones(m, 1) X];
+z2 = a1 * Theta1';
+a2 = [ones(m, 1) sigmoid(z2)];
+z3 = a2 * Theta2';
+a3 = sigmoid(z3);
+% h_theta = sigmoid([ones(m,1) sigmoid([ones(m, 1) X] * Theta1')] * Theta2');
+h_theta = a3;
 y_vec = eye(K)(y,:);
 
 J = sum(sum(log(h_theta) .* y_vec + log(1 - h_theta) .* (1 - y_vec))) / -m;
 regularization = (sum(sum(Theta1( : , 2 : end) .^ 2)) + sum(sum(Theta2( : , 2 : end) .^ 2))) * lambda / (2 * m);
-
 J = J + regularization;
 
-for t = 1 : m
-			
-end
+delta3 = a3 - y_vec;
+g_prime2 = a2 .* (1 - a2);
+delta2 = (delta3 * Theta2) .* g_prime2;
+delta2_trim = delta2(:, 2 : end);
+
+Delta2 = delta3' * a2;
+Delta1 = delta2_trim' * a1;
+
+Delta2_reg = Delta2 + lambda * [zeros(size(Theta2, 1), 1) Theta2( : , 2 : end)]; 
+Delta1_reg = Delta1 + lambda * [zeros(size(Theta1, 1), 1) Theta1( : , 2 : end)]; 
+
+Theta2_grad = Delta2_reg / m;
+Theta1_grad = Delta1_reg / m;
 
 
 
